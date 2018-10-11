@@ -14,19 +14,15 @@ class GeneticAlgorithm:
     mean_generations = None
     failed = False
 
-    def __init__(self, target_string, population_size, crossover_rate, mutation_rate,
+    def __init__(self, test_case_dict, population_size, crossover_rate, mutation_rate,
                  is_k_point_crossover, tournament_size_percent, strongest_winner_probability):
-        self.target_string = target_string
+        self.test_case_dict = test_case_dict
         self.population_size = population_size
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.is_k_point_crossover = is_k_point_crossover
         self.tournament_size_percent = tournament_size_percent
         self.strongest_winner_probability = strongest_winner_probability
-
-    def available_chars(self):
-        characters = string.ascii_letters + string.digits + ' ' + '\x7f' + string.punctuation
-        return characters
 
     def tournament_size(self):
         size = int(self.tournament_size_percent * self.population_size)
@@ -54,7 +50,7 @@ class GeneticAlgorithm:
             generation_number = 0
             fittest_chromosome = 0
             if self.show_each_chromosome: print("Hamming Distance      Chromosome          Generation\n")
-            while self.target_string not in population:
+            while "TARGET STRING, NEEDS TO CHANGE" not in population:
                 generation_number += 1
                 if generation_number > 499:
                     self.failed = True
@@ -67,7 +63,7 @@ class GeneticAlgorithm:
                 counter = 0
                 for chromosome in population:
                     counter += 1
-                    fitness_value = self.fitness(chromosome, self.target_string)
+                    fitness_value = self.fitness(chromosome, "TARGET STRING, NEEDS TO CHANGE")
                     if counter == 1:
                         fittest_chromosome = chromosome, fitness_value
                     if self.show_each_chromosome:
@@ -91,14 +87,16 @@ class GeneticAlgorithm:
 
     def generate_population(self, size):
         population = []
-        for i in range(0,size):
+        for i in range(0,):
             chromosome = []
-            str_length = len(self.target_string)
-            for char in range(0,str_length):
-                char = random.choice(self.available_chars())
-                chromosome.append(char)
-            chromo_string = ''.join(chromosome)
-            population.append(chromo_string)
+            for j in range(0,5):
+                random_index = random.randint(0, len(self.test_case_dict) - 1)
+                test_case_key = 't{}'.format(random_index)
+                chromosome.append(self.test_case_dict.get(test_case_key))
+                print(chromosome)
+            #print(chromosome)
+            #chromo_string = ''.join(chromosome)
+            #population.append(chromo_string)
         return population
 
     def fitness(self, source, target):
@@ -126,7 +124,7 @@ class GeneticAlgorithm:
             for participant_str in range(0, self.tournament_size()):
                 random_index = random.randint(0, len(population) - 1)
                 participant_str = population[random_index]
-                participant_fitness = self.fitness(participant_str, self.target_string)
+                participant_fitness = self.fitness(participant_str, "TARGET STRING, NEEDS TO CHANGE")
                 participant = participant_str, participant_fitness
                 participants.append(participant)
             if self.decision(self.strongest_winner_prob()):
@@ -171,12 +169,12 @@ class GeneticAlgorithm:
         first_child_char_array = []
         second_child_char_array = []
         i = 0
-        point = int(self.crossover_point() * (len(self.target_string) - 1)) + 1
+        point = int(self.crossover_point() * (len("TARGET STRING, NEEDS TO CHANGE") - 1)) + 1
         points = []
         for char_a, char_b in zip(first_parent, second_parent):
             i += 1
             if is_k_point_crossover:
-                point = int(self.crossover_point() * (len(self.target_string) - 1)) + 1
+                point = int(self.crossover_point() * (len("TARGET STRING, NEEDS TO CHANGE") - 1)) + 1
                 points.append(point)
             if i <= point:
                 first_child_char_array.append(char_a)
@@ -253,3 +251,6 @@ class GeneticAlgorithm:
         print("\n\nGenetic Algorithm Run  Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
               "     Mean Generations:", int(self.mean_generations), "\n\n\n")
         return self.mean_time
+
+    def check_for_duplicate(self, tuple):
+        return len(tuple) != len(set(tuple))

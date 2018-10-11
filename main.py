@@ -4,10 +4,12 @@ __author__ = 'David T. Pocock'
 from hill_climbing import HillClimbing
 from random_search import RandomSearch
 from genetic_algorithm import GeneticAlgorithm
+from csv_parser import CSVParser
 
 
 def main():
-    target_string = "Hello World!"
+    parser = CSVParser('smallfaultmatrix.txt')
+    test_case_dict = parser.parse();
 
     """
     The main method for the application. The Genetic Algorithm uses tournament
@@ -24,12 +26,12 @@ def main():
     @param: strongest_winner_probability Probability of strongest participant
             in tournament to win, as well as the second strongest's probability
     """
-    ga = GeneticAlgorithm(target_string, 1400, 0.8, 0.05, True, 0.05, 0.65)
+    ga = GeneticAlgorithm(test_case_dict, 1400, 0.8, 0.05, True, 0.05, 0.65)
     ga.set_show_each_chromosome(False)
     ga.set_show_crossover_internals(False)
     ga.set_show_mutation_internals(False)
     ga.set_silent(False) # If False it shows the fittest chromosome of each generation
-    ga.run(10)
+    ga.run(1)
     ga.get_stats()
 
     """
@@ -38,11 +40,11 @@ def main():
     @param: solutions_size Amount of solutions (strings) to search for a
             better solution in
     """
-    hc = HillClimbing(target_string, 10)
+    """hc = HillClimbing(target_string, 10)
     hc.set_show_each_solution(False)
     hc.set_silent(True)
     hc.run(10)
-    hc.get_stats()
+    hc.get_stats()"""
 
     """
     The Random Search constructor takes in the following parameters:

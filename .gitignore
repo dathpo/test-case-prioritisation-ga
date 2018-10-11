@@ -5,6 +5,19 @@ venv/
 __pycache__/
 *.pyc
 pypy/
+.directory
+.idea/codeStyles/Project.xml
+*.iml
+.idea/vcs.xml
+.gradle
+/local.properties
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
 
 # User-specific stuff
 .idea/**/workspace.xml
@@ -32,7 +45,11 @@ pypy/
 
 # Gradle
 .idea/**/gradle.xml
+.idea/gradle.xml
+.idea/**/misc.xml
+.idea/misc.xml
 .idea/**/libraries
+
 
 # Gradle and Maven with auto-import
 # When using Gradle or Maven with auto-import, you should exclude module files,

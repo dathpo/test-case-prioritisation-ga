@@ -14,15 +14,14 @@ class GeneticAlgorithm:
     mean_generations = None
     failed = False
 
-    def __init__(self, test_cases, chromosome_size, population_size, number_of_generations, crossover_rate, mutation_rate,
-                 is_k_point_crossover, tournament_size_percent, strongest_winner_probability):
+    def __init__(self, test_cases, chromosome_size, population_size, number_of_generations, crossover_rate,
+                 mutation_rate, tournament_size_percent, strongest_winner_probability):
         self.test_cases = test_cases
         self.chromosome_size = chromosome_size
         self.population_size = population_size
         self.number_of_generations = number_of_generations
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
-        self.is_k_point_crossover = is_k_point_crossover
         self.tournament_size_percent = tournament_size_percent
         self.strongest_winner_probability = strongest_winner_probability
 
@@ -89,19 +88,19 @@ class GeneticAlgorithm:
 
     def generate_population(self, size):
         population = []
-        # for i in range(0, size):
-        #     chromosome = []
-        #     for j in range(0, self.chromosome_size):
-        #         self.populate(j, chromosome)
-        #     population.append(chromosome)
-        chromosome = []
-        chromosome.append(('t1', [True, False, False, False, False]))
-        chromosome.append(('t5', [False, False, False, False, False]))
-        chromosome.append(('t2', [False, False, True, False, True]))
-        chromosome.append(('t4', [True, False, False, True, False]))
+        for i in range(0, size):
+            chromosome = []
+            for j in range(0, self.chromosome_size):
+                self.populate(j, chromosome)
+            population.append(chromosome)
+        # chromosome = []
+        # chromosome.append(('t1', [True, False, False, False, False]))
+        # chromosome.append(('t5', [False, False, False, False, False]))
+        # chromosome.append(('t2', [False, False, True, False, True]))
+        # chromosome.append(('t4', [True, False, False, True, False]))
         # chromosome.append(('t3', [False, True, False, False, False]))
         # chromosome.append(('t6', [False, False, False, False, True]))
-        population.append(chromosome)
+        # population.append(chromosome)
         return population
 
     def populate(self, j, chromosome):
@@ -114,19 +113,19 @@ class GeneticAlgorithm:
 
     def fitness(self, chromosome):
         weight = 0
-        number_of_test_cases = self.chromosome_size
+        number_of_test_cases_in_set = self.chromosome_size
         number_of_faults = len(chromosome[0][1])
         # print(chromosome)
         for i in range(0, number_of_faults):
-            for j in range(0, number_of_test_cases):
+            for j in range(0, number_of_test_cases_in_set):
                 # print(chromosome[j][1][i], j )
                 if chromosome[j][1][i]:
                     weight += j+1
                     break
                 if j == self.chromosome_size - 1:
-                    weight += number_of_test_cases + 1
-        apfd = 1 - (weight/(number_of_faults * number_of_test_cases)) + 1/(2 * number_of_test_cases)
-        # print("weight:", weight, "APFD:", apfd, "no faults:", number_of_faults, "no test cases:", number_of_test_cases)
+                    weight += number_of_test_cases_in_set + 1
+        apfd = 1 - (weight/(number_of_faults * number_of_test_cases_in_set)) + 1/(2 * number_of_test_cases_in_set)
+        # print("weight:", weight, "APFD:", apfd, "no faults:", number_of_faults, "no test cases:", number_of_test_cases_in_set)
         return apfd
 
     def selection(self, population):
@@ -140,39 +139,44 @@ class GeneticAlgorithm:
         winners = []
         for t_round in range(0, self.tournament_rounds()):
             participants = []
-            for participant_str in range(0, self.tournament_size()):
+            for participant in range(0, self.tournament_size()):
                 random_index = random.randint(0, len(population) - 1)
                 participant = population[random_index]
                 participant_fitness = self.fitness(participant)
                 participant_evaluated = participant, participant_fitness
                 participants.append(participant_evaluated)
             if self.decision(self.strongest_winner_prob()):
-                winner = min(participants, key=itemgetter(1))
+                winner = max(participants, key=itemgetter(1))
+                # print("winner:", winner)
                 winners.append(winner)
             elif self.decision(self.strongest_winner_prob()):
-                temp_participant = min(participants, key=itemgetter(1))
+                temp_participant = max(participants, key=itemgetter(1))
                 participants.remove(temp_participant)
-                winner = min(participants, key=itemgetter(1))
+                winner = max(participants, key=itemgetter(1))
+                # print("2nd winner:", winner)
                 winners.append(winner)
                 participants.append(temp_participant)
             else:
-                first_temp_participant = min(participants, key=itemgetter(1))
+                first_temp_participant = max(participants, key=itemgetter(1))
                 participants.remove(first_temp_participant)
-                second_temp_participant = min(participants, key=itemgetter(1))
+                second_temp_participant = max(participants, key=itemgetter(1))
                 participants.remove(second_temp_participant)
-                winner = min(participants, key=itemgetter(1))
+                winner = max(participants, key=itemgetter(1))
+                # print("3rd winner:", winner)
                 winners.append(winner)
                 participants.append(first_temp_participant)
                 participants.append(second_temp_participant)
-        winners_strings = [str[0] for str in winners]
-        paired_winners = list(zip(winners_strings[0::2], winners_strings[1::2]))
+        winners_test_suites = [test_suites[0] for test_suites in winners]
+        paired_winners = list(zip(winners_test_suites[0::2], winners_test_suites[1::2]))
         return paired_winners
 
     def check_for_crossover(self, parents):
         new_generation = []
         for first_parent, second_parent in parents:
+            # print("1:", first_parent)
+            # print("2:", second_parent)
             if self.decision(self.crossover_rate):
-                children_duo = self.crossover(first_parent, second_parent, self.is_k_point_crossover)
+                children_duo = self.crossover(first_parent, second_parent)
                 for child in children_duo:
                     new_generation.append(child)
             else:
@@ -180,37 +184,46 @@ class GeneticAlgorithm:
                 new_generation.append(second_parent)
         return new_generation
 
-    def crossover(self, first_parent, second_parent, is_k_point_crossover):
-        if is_k_point_crossover: crossover_method = "k-Point Crossover"
-        else: crossover_method = "One-Point Crossover"
+    def crossover(self, first_parent, second_parent):
         if self.show_crossover_internals:
-            print("\nParent #1:", first_parent, "      Parent #2:", second_parent, "      Crossover Method:", crossover_method)
-        first_child_char_array = []
-        second_child_char_array = []
+            print("\nParent #1:", first_parent)
+            print("Parent #2:", second_parent)
+        first_child_test_case_set = []
+        second_child_test_case_set = []
         i = 0
-        point = int(self.crossover_point() * (len("TARGET STRING, NEEDS TO CHANGE") - 1)) + 1
-        points = []
-        for char_a, char_b in zip(first_parent, second_parent):
+        point = int(self.crossover_point() * (self.chromosome_size - 1)) + 1
+        first_parent_copy = first_parent.copy()
+        second_parent_copy = second_parent.copy()
+        # print("Point:", point)
+        # print("P1C:", first_parent_copy)
+        # print("P2C:", second_parent_copy)
+        for test_case_a, test_case_b in zip(first_parent, second_parent):
             i += 1
-            if is_k_point_crossover:
-                point = int(self.crossover_point() * (len("TARGET STRING, NEEDS TO CHANGE") - 1)) + 1
-                points.append(point)
             if i <= point:
-                first_child_char_array.append(char_a)
-                second_child_char_array.append(char_b)
+                # print("\nTest case A:", test_case_a)
+                # print("Test case B:", test_case_b)
+                first_child_test_case_set.append(test_case_a)
+                if test_case_b in first_parent_copy:
+                    first_parent_copy.remove(test_case_b)
+                else:
+                    first_parent_copy.pop()
+                second_child_test_case_set.append(test_case_b)
+                if test_case_a in second_parent_copy:
+                    second_parent_copy.remove(test_case_a)
+                else:
+                    second_parent_copy.pop()
+                # print("P1C", first_parent_copy)
+                # print("P2C", second_parent_copy)
             else:
-                first_child_char_array.append(char_b)
-                second_child_char_array.append(char_a)
-        first_child = ''.join(first_child_char_array)
-        second_child = ''.join(second_child_char_array)
+                # for test_case_1, test_case_2 in zip(first_parent_copy, second_parent_copy):
+                first_child_test_case_set.extend(second_parent_copy)
+                second_child_test_case_set.extend(first_parent_copy)
+                break
         if self.show_crossover_internals:
-            if is_k_point_crossover:
-                print("Child #1: ", first_child, "      Parent #2:", second_child,
-                      "      Crossover Point at multiple points")
-            else:
-                print("Child #1: ", first_child, "      Parent #2:", second_child,
-                      "      Crossover Point after character #{}".format(point))
-        return first_child, second_child
+            print("Child #1:", first_child_test_case_set)
+            print("Child #2:", second_child_test_case_set)
+            print("Crossover Point after Test Case #{}".format(point))
+        return first_child_test_case_set, second_child_test_case_set
 
     def mutate(self, generation):
         """I left the print statements in to allow seeing how the bit-flipping works in the mutation process"""

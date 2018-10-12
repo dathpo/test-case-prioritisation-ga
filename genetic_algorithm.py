@@ -14,10 +14,12 @@ class GeneticAlgorithm:
     mean_generations = None
     failed = False
 
-    def __init__(self, test_case_dict, population_size, crossover_rate, mutation_rate,
+    def __init__(self, test_cases, chromosome_size, population_size, number_of_generations, crossover_rate, mutation_rate,
                  is_k_point_crossover, tournament_size_percent, strongest_winner_probability):
-        self.test_case_dict = test_case_dict
+        self.test_cases = test_cases
+        self.chromosome_size = chromosome_size
         self.population_size = population_size
+        self.number_of_generations = number_of_generations
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
         self.is_k_point_crossover = is_k_point_crossover
@@ -49,13 +51,13 @@ class GeneticAlgorithm:
                 raise ValueError('Tournament Size must be an even number!')
             generation_number = 0
             fittest_chromosome = 0
-            if self.show_each_chromosome: print("Hamming Distance      Chromosome          Generation\n")
-            while "TARGET STRING, NEEDS TO CHANGE" not in population:
+            if self.show_each_chromosome: print("Fitness (APFD)      Chromosome          Generation\n")
+            for i in range(0, self.number_of_generations):
                 generation_number += 1
-                if generation_number > 499:
-                    self.failed = True
-                    print("\nThe Genetic Algorithm failed, as the target string was not reached after 500 generations\n")
-                    break
+                # if generation_number > 499:
+                #     self.failed = True
+                #     print("\nThe Genetic Algorithm failed, as the target string was not reached after 500 generations\n")
+                #     break
                 winners = self.selection(population)
                 pre_mutation_generation = self.check_for_crossover(winners)
                 new_generation = self.mutate(pre_mutation_generation)
@@ -68,7 +70,7 @@ class GeneticAlgorithm:
                         fittest_chromosome = chromosome, fitness_value
                     if self.show_each_chromosome:
                         print("       {}            {}            {}"
-                          .format(str(fitness_value).rjust(2), chromosome.rjust(2), str(generation_number).rjust(2)))
+                              .format(str(fitness_value).rjust(2), chromosome.rjust(2), str(generation_number).rjust(2)))
                     if fitness_value <= fittest_chromosome[1]:
                         fittest_chromosome = chromosome, fitness_value
                         if fitness_value == 0:
@@ -81,34 +83,51 @@ class GeneticAlgorithm:
             generations.append(generation_number)
             if not self.failed:
                 print("\nGenetic Algorithm complete, Execution Time: {0:.3f} seconds".format(exec_time),
-                  "          Generations:", generation_number, "\n")
+                      "          Generations:", generation_number, "\n")
         if not self.failed:
             self.set_stats(times, generations, number_of_runs)
 
     def generate_population(self, size):
         population = []
-        for i in range(0,):
-            chromosome = []
-            for j in range(0,5):
-                random_index = random.randint(0, len(self.test_case_dict) - 1)
-                test_case_key = 't{}'.format(random_index)
-                chromosome.append(self.test_case_dict.get(test_case_key))
-                print(chromosome)
-            #print(chromosome)
-            #chromo_string = ''.join(chromosome)
-            #population.append(chromo_string)
+        # for i in range(0, size):
+        #     chromosome = []
+        #     for j in range(0, self.chromosome_size):
+        #         self.populate(j, chromosome)
+        #     population.append(chromosome)
+        chromosome = []
+        chromosome.append(('t1', [True, False, False, False, False]))
+        chromosome.append(('t5', [False, False, False, False, False]))
+        chromosome.append(('t2', [False, False, True, False, True]))
+        chromosome.append(('t4', [True, False, False, True, False]))
+        # chromosome.append(('t3', [False, True, False, False, False]))
+        # chromosome.append(('t6', [False, False, False, False, True]))
+        population.append(chromosome)
         return population
 
-    def fitness(self, source, target):
-        if len(source) == len(target):
-            pairs = zip(source, target)
-            hamming_distance = 0
-            for a, b in pairs:
-                if a != b:
-                    hamming_distance += 1
-            return hamming_distance
-        else:
-            raise ValueError('Source and target string must be of the same length!')
+    def populate(self, j, chromosome):
+        random_index = random.randint(0, len(self.test_cases) - 1)
+        chromosome.append(self.test_cases[random_index])
+        if j > 0:
+            if self.check_for_duplicate(chromosome):
+                chromosome.pop()
+                self.populate(j, chromosome)
+
+    def fitness(self, chromosome):
+        weight = 0
+        number_of_test_cases = self.chromosome_size
+        number_of_faults = len(chromosome[0][1])
+        # print(chromosome)
+        for i in range(0, number_of_faults):
+            for j in range(0, number_of_test_cases):
+                # print(chromosome[j][1][i], j )
+                if chromosome[j][1][i]:
+                    weight += j+1
+                    break
+                if j == self.chromosome_size - 1:
+                    weight += number_of_test_cases + 1
+        apfd = 1 - (weight/(number_of_faults * number_of_test_cases)) + 1/(2 * number_of_test_cases)
+        # print("weight:", weight, "APFD:", apfd, "no faults:", number_of_faults, "no test cases:", number_of_test_cases)
+        return apfd
 
     def selection(self, population):
         return self.tournament_selection(population)
@@ -123,10 +142,10 @@ class GeneticAlgorithm:
             participants = []
             for participant_str in range(0, self.tournament_size()):
                 random_index = random.randint(0, len(population) - 1)
-                participant_str = population[random_index]
-                participant_fitness = self.fitness(participant_str, "TARGET STRING, NEEDS TO CHANGE")
-                participant = participant_str, participant_fitness
-                participants.append(participant)
+                participant = population[random_index]
+                participant_fitness = self.fitness(participant)
+                participant_evaluated = participant, participant_fitness
+                participants.append(participant_evaluated)
             if self.decision(self.strongest_winner_prob()):
                 winner = min(participants, key=itemgetter(1))
                 winners.append(winner)
@@ -252,5 +271,13 @@ class GeneticAlgorithm:
               "     Mean Generations:", int(self.mean_generations), "\n\n\n")
         return self.mean_time
 
-    def check_for_duplicate(self, tuple):
-        return len(tuple) != len(set(tuple))
+    def check_for_duplicate(self, chromosome):
+        duplicate_checker = []
+        for test_case, faults in chromosome:
+            duplicate_checker.append(test_case)
+        return len(duplicate_checker) != len(set(duplicate_checker))
+
+        # if len(chromosome) != len(set(chromosome))
+
+    #     return
+    #print(chromosome[0])

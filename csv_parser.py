@@ -14,16 +14,12 @@ class CSVParser:
         pwd = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(pwd, self.file_name)
         test_case_dict = {}
-        counter = 0
         with open(path, newline='') as file:
             matrix_reader = csv.reader(file)
-            for row in matrix_reader:
+            for row in reversed(list(matrix_reader)):
                 faults_revealed = []
                 for element in row[1:]:
-                    booled = int(element)
+                    booled = bool(int(element))
                     faults_revealed.append(booled)
-                print(counter, tuple(faults_revealed))
                 test_case_dict[tuple(faults_revealed)] = row[0]
-                counter += 1
-            print(len(test_case_dict))
         return test_case_dict

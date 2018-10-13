@@ -8,7 +8,7 @@ from csv_parser import CSVParser
 
 
 def main():
-    parser = CSVParser('bigfaultmatrix.txt')
+    parser = CSVParser('smallfaultmatrix.txt')
     test_case_suite = parser.parse()
 
     """
@@ -31,8 +31,8 @@ def main():
     ga.set_show_crossover_internals(False)
     ga.set_show_mutation_internals(False)
     ga.set_silent(False) # If False it shows the fittest chromosome of each generation
-    # ga.run(5)
-    # ga.get_stats()
+    ga.run(5)
+    ga.get_stats()
 
     """
     The Hill Climbing constructor takes in the following parameters:

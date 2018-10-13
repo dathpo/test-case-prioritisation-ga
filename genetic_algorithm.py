@@ -47,7 +47,7 @@ class GeneticAlgorithm:
         for i in range(0, number_of_runs):
             self.failed = False
             start_time = timeit.default_timer()
-            population = self.generate_population(self.population_size)
+            population = self.generate_population(self.population_size, self.chromosome_size)
             if self.tournament_size() % 2 != 0:
                 raise ValueError('Tournament Size must be an even number!')
             generation_number = 0
@@ -63,7 +63,7 @@ class GeneticAlgorithm:
                 counter = 0
                 for chromosome in population:
                     counter += 1
-                    fitness_value = self.fitness(chromosome)
+                    fitness_value = self.fitness(chromosome, self.chromosome_size)
                     if counter == 1:
                         fittest_chromosome = chromosome, fitness_value
                     if self.show_each_chromosome:
@@ -80,16 +80,16 @@ class GeneticAlgorithm:
             times.append(exec_time)
             fitness_values.append(fittest_chromosome[1])
             if not self.failed:
-                print("\nGA search complete         Execution Time: {0:.3f} seconds".format(exec_time),
-                      "          Fittest APFD value reached:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
+                print("\nGA Search complete         Execution Time: {0:.3f} seconds".format(exec_time),
+                      "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
         if not self.failed:
             self.set_stats(times, fitness_values, number_of_runs)
 
-    def generate_population(self, size):
+    def generate_population(self, population_size, chromosome_size):
         population = []
-        for i in range(0, size):
+        for i in range(0, population_size):
             chromosome = []
-            for j in range(0, self.chromosome_size):
+            for j in range(0, chromosome_size):
                 self.populate(j, chromosome)
             if self.show_duplicate_internals: print()
             population.append(chromosome)
@@ -105,9 +105,9 @@ class GeneticAlgorithm:
                 chromosome.pop()
                 self.populate(j, chromosome)
 
-    def fitness(self, chromosome):
+    def fitness(self, chromosome, chromosome_size):
         weight = 0
-        number_of_test_cases_in_set = self.chromosome_size
+        number_of_test_cases_in_set = chromosome_size
         number_of_faults = len(chromosome[0][1])
         if self.show_fitness_internals: print("Calculating fitness (APFD) of Chromosome:", [i[0] for i in chromosome])
         for i in range(0, number_of_faults):
@@ -115,7 +115,7 @@ class GeneticAlgorithm:
                 if chromosome[j][1][i]:
                     weight += j+1
                     break
-                if j == self.chromosome_size - 1:
+                if j == chromosome_size - 1:
                     weight += number_of_test_cases_in_set + 1
         apfd = 1 - (weight/(number_of_faults * number_of_test_cases_in_set)) + 1/(2 * number_of_test_cases_in_set)
         if self.show_fitness_internals:
@@ -137,7 +137,7 @@ class GeneticAlgorithm:
             for participant in range(0, self.tournament_size()):
                 random_index = random.randint(0, len(population) - 1)
                 participant = population[random_index]
-                participant_fitness = self.fitness(participant)
+                participant_fitness = self.fitness(participant, self.chromosome_size)
                 participant_evaluated = participant, participant_fitness
                 participants.append(participant_evaluated)
             if self.decision(self.strongest_winner_prob()):

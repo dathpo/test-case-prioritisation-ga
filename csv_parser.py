@@ -3,7 +3,6 @@ __author__ = 'David T. Pocock'
 
 import csv
 import os.path
-from collections import defaultdict
 
 
 class CSVParser:

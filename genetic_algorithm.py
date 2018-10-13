@@ -14,9 +14,9 @@ class GeneticAlgorithm:
     mean_generations = None
     failed = False
 
-    def __init__(self, test_cases, chromosome_size, population_size, number_of_generations, crossover_rate,
+    def __init__(self, test_case_suite, chromosome_size, population_size, number_of_generations, crossover_rate,
                  mutation_rate, tournament_size_percent, strongest_winner_probability):
-        self.test_cases = test_cases
+        self.test_case_suite = test_case_suite
         self.chromosome_size = chromosome_size
         self.population_size = population_size
         self.number_of_generations = number_of_generations
@@ -64,16 +64,16 @@ class GeneticAlgorithm:
                 counter = 0
                 for chromosome in population:
                     counter += 1
-                    fitness_value = self.fitness(chromosome, "TARGET STRING, NEEDS TO CHANGE")
+                    fitness_value = self.fitness(chromosome)
                     if counter == 1:
                         fittest_chromosome = chromosome, fitness_value
                     if self.show_each_chromosome:
                         print("       {}            {}            {}"
-                              .format(str(fitness_value).rjust(2), chromosome.rjust(2), str(generation_number).rjust(2)))
-                    if fitness_value <= fittest_chromosome[1]:
+                              .format(fitness_value, chromosome, generation_number))
+                    if fitness_value >= fittest_chromosome[1]:
                         fittest_chromosome = chromosome, fitness_value
-                        if fitness_value == 0:
-                            break
+                        # if fitness_value == 1:
+                        #     break
                 if not self.silent:
                     print("\nFittest Value:", fittest_chromosome[1], "    Chromosome:", fittest_chromosome[0],
                           "    Generation:", generation_number)
@@ -104,8 +104,8 @@ class GeneticAlgorithm:
         return population
 
     def populate(self, j, chromosome):
-        random_index = random.randint(0, len(self.test_cases) - 1)
-        chromosome.append(self.test_cases[random_index])
+        random_index = random.randint(0, len(self.test_case_suite) - 1)
+        chromosome.append(self.test_case_suite[random_index])
         if j > 0:
             if self.check_for_duplicate(chromosome):
                 chromosome.pop()
@@ -226,42 +226,25 @@ class GeneticAlgorithm:
         return first_child_test_case_set, second_child_test_case_set
 
     def mutate(self, generation):
-        """I left the print statements in to allow seeing how the bit-flipping works in the mutation process"""
         new_generation = []
         for chromosome in generation:
             if self.show_mutation_internals: print("\nChromosome being worked on:  ", chromosome, "\n")
-            chromosome_bit_array = []
-            for char in chromosome:
-                binary_char = bin(ord(char))
-                if self.show_mutation_internals: print("Char:    ", char, "   ASCII #:", ord(char), "   Binary Char:", binary_char)
-                new_binary_char_array = ['0', 'b', '1']
-                for bit in binary_char[3:]:
-                    if self.decision(self.mutation_rate):
-                        flipped_bit = int(bit) ^ 1
-                        if self.show_mutation_internals: print("Bit:     ", str(bit), "   Flipped Bit:", str(flipped_bit))
-                        new_binary_char_array.append(str(flipped_bit))
-                    else:
-                        if self.show_mutation_internals: print("Bit:     ", str(bit))
-                        new_binary_char_array.append(str(bit))
-                new_binary_char = ''.join(new_binary_char_array)
-                if self.show_mutation_internals:
-                    print("New Char:", chr(int(new_binary_char, 2)), "   ASCII #:",
-                          int(new_binary_char, 2), "   Binary Char:", new_binary_char, "\n")
-                chromosome_bit_array.append(new_binary_char)
-            new_chromosome = self.bit_array_to_string(chromosome_bit_array)
-            if self.show_mutation_internals:
-                print("Chromosome pre-mutation:   ", chromosome)
-                print("Chromosome post-mutation:  ", new_chromosome, "\n")
-            new_generation.append(new_chromosome)
+            for test_case in chromosome:
+                if self.decision(self.mutation_rate):
+                    if self.show_mutation_internals: print("Chromosome pre-mutation:   ", chromosome)
+                    current_index = chromosome.index(test_case)
+                    random_index = self.swap_test_cases(current_index)
+                    chromosome[current_index], chromosome[random_index] = chromosome[random_index], chromosome[current_index]
+                    if self.show_mutation_internals: print("Chromosome post-mutation:   ", chromosome, "\n")
+            new_generation.append(chromosome)
         return new_generation
 
-    def bit_array_to_string(self, array):
-        char_array = []
-        for bit in array:
-            char = chr(int(bit, 2))
-            char_array.append(char)
-        str = ''.join(char_array)
-        return str
+    def swap_test_cases(self, test_case_index):
+        random_index = random.randint(0, self.chromosome_size - 1)
+        if random_index is not test_case_index:
+            return random_index
+        else:
+            return self.swap_test_cases(test_case_index)
 
     def set_show_each_chromosome(self, boolean):
         self.show_each_chromosome = boolean
@@ -289,8 +272,3 @@ class GeneticAlgorithm:
         for test_case, faults in chromosome:
             duplicate_checker.append(test_case)
         return len(duplicate_checker) != len(set(duplicate_checker))
-
-        # if len(chromosome) != len(set(chromosome))
-
-    #     return
-    #print(chromosome[0])

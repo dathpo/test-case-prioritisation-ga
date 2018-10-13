@@ -8,8 +8,8 @@ from csv_parser import CSVParser
 
 
 def main():
-    parser = CSVParser('smallfaultmatrix.txt')
-    test_cases = parser.parse();
+    parser = CSVParser('bigfaultmatrix.txt')
+    test_case_suite = parser.parse()
 
     """
     The main method for the application. The Genetic Algorithm uses tournament
@@ -26,12 +26,12 @@ def main():
     @param: strongest_winner_probability Probability of strongest participant
             in tournament to win, as well as the second strongest's probability
     """
-    ga = GeneticAlgorithm(test_cases, 5, 1400, 1000, 0.8, 0.05, 0.05, 0.65)
+    ga = GeneticAlgorithm(test_case_suite, 200, 1000, 50, 0.2, 0.5, 0.05, 0.9)
     ga.set_show_each_chromosome(False)
-    ga.set_show_crossover_internals(True)
+    ga.set_show_crossover_internals(False)
     ga.set_show_mutation_internals(False)
     ga.set_silent(False) # If False it shows the fittest chromosome of each generation
-    ga.run(1)
+    ga.run(5)
     ga.get_stats()
 
     """

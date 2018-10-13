@@ -26,7 +26,7 @@ def main():
     @param: strongest_winner_probability Probability of strongest participant
             in tournament to win, as well as the second strongest's probability
     """
-    ga = GeneticAlgorithm(test_case_suite, 200, 1000, 50, 0.2, 0.5, 0.05, 0.9)
+    ga = GeneticAlgorithm(test_case_suite, 200, 1000, 50, 0.8, 0.5, 0.05, 0.9)
     ga.set_show_each_chromosome(False)
     ga.set_show_crossover_internals(False)
     ga.set_show_mutation_internals(False)

@@ -13,7 +13,7 @@ class GeneticAlgorithm:
     show_duplicate_internals = None
     silent = None
     mean_time = None
-    mean_generations = None
+    mean_fitness = None
     failed = False
 
     def __init__(self, test_case_suite, chromosome_size, population_size, number_of_generations, crossover_rate,
@@ -43,7 +43,7 @@ class GeneticAlgorithm:
 
     def run(self, number_of_runs):
         times = []
-        generations = []
+        fitness_values = []
         for i in range(0, number_of_runs):
             self.failed = False
             start_time = timeit.default_timer()
@@ -74,16 +74,16 @@ class GeneticAlgorithm:
                         if fitness_value == 1:
                             break
                 if not self.silent:
-                    print("\nFittest Value:", fittest_chromosome[1], "    Chromosome:", [i[0] for i in fittest_chromosome[0]],
-                          "    Generation:", generation_number)
+                    print("\nFittest (APFD):", fittest_chromosome[1], "    Generation:", generation_number,
+                          "    Chromosome:", [i[0] for i in fittest_chromosome[0]])
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
-            generations.append(generation_number)
+            fitness_values.append(fittest_chromosome[1])
             if not self.failed:
-                print("\nGenetic Algorithm complete, Execution Time: {0:.3f} seconds".format(exec_time),
-                      "          Generations:", generation_number, "\n")
+                print("\nGA search complete         Execution Time: {0:.3f} seconds".format(exec_time),
+                      "          Fittest APFD value reached:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
         if not self.failed:
-            self.set_stats(times, generations, number_of_runs)
+            self.set_stats(times, fitness_values, number_of_runs)
 
     def generate_population(self, size):
         population = []
@@ -249,14 +249,13 @@ class GeneticAlgorithm:
     def set_silent(self, boolean):
         self.silent = boolean
 
-    def set_stats(self, times, generations, number_of_runs):
+    def set_stats(self, times, fitness_values, number_of_runs):
         self.mean_time = sum(times) / number_of_runs
-        self.mean_generations = sum(generations) / number_of_runs
+        self.mean_fitness = sum(fitness_values) / number_of_runs
 
     def get_stats(self):
-        print("\n\nGenetic Algorithm Run  Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
-              "     Mean Generations:", int(self.mean_generations), "\n\n\n")
-        return self.mean_time
+        print("\n\nGA run complete           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
+              "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
 
     def check_for_duplicate(self, chromosome):
         duplicate_checker = []

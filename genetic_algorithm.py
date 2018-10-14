@@ -215,7 +215,7 @@ class GeneticAlgorithm:
                 if self.decision(self.mutation_rate):
                     if self.show_mutation_internals: print("Chromosome pre-mutation:   ", [i[0] for i in chromosome])
                     current_index = chromosome.index(test_case)
-                    random_index = self.swap_test_cases(current_index)
+                    random_index = self.swap_test_cases(current_index, self.chromosome_size)
                     chromosome[current_index], chromosome[random_index] = chromosome[random_index], chromosome[current_index]
                     if self.show_mutation_internals:
                         print("Test Case", chromosome[current_index][0], "at index #{}".format(random_index),
@@ -224,12 +224,12 @@ class GeneticAlgorithm:
             new_generation.append(chromosome)
         return new_generation
 
-    def swap_test_cases(self, test_case_index):
-        random_index = random.randint(0, self.chromosome_size - 1)
+    def swap_test_cases(self, test_case_index, chromosome_size):
+        random_index = random.randint(0, chromosome_size - 1)
         if random_index is not test_case_index:
             return random_index
         else:
-            return self.swap_test_cases(test_case_index)
+            return self.swap_test_cases(test_case_index, chromosome_size)
 
     def set_show_each_chromosome(self, boolean):
         self.show_each_chromosome = boolean

@@ -7,10 +7,10 @@ from genetic_algorithm import GeneticAlgorithm
 
 class HillClimbing(GeneticAlgorithm):
     show_each_solution = None
-    show_fitness_internals = None
+    show_swapping_internals = None
     silent = None
     mean_time = None
-    mean_rounds = None
+    mean_fitness = None
 
     def __init__(self, test_case_suite, solution_size, solutions_pool_size, number_of_rounds):
         self.test_case_suite = test_case_suite
@@ -20,84 +20,107 @@ class HillClimbing(GeneticAlgorithm):
 
     def run(self, number_of_runs):
         times = []
-        rounds = []
+        fitness_values = []
         for i in range(0, number_of_runs):
             start_time = timeit.default_timer()
             solutions = self.generate_population(self.solutions_pool_size, self.solution_size)
-            print("Solutions:", solutions)
             best_solution = self.evaluate(solutions)
-            print("best solution", best_solution[1])
+            if not self.set_silent:
+                print("Solution with fittest APFD selected:       {0:.10f}".format(best_solution[1]), "      ", [i[0] for i in best_solution[0]])
             round_number = 0
             if not self.silent:
                 if self.show_each_solution is True:
-                    print("\n     Fitness              Solution            Round\n")
-                else:
-                    print("\n               Fitness    Solution            Round\n")
+                    print("\n     Fitness              Solution\n")
             for i in range(0, self.number_of_rounds):
                 round_number += 1
                 if best_solution[1] == 1:
                     break
-                new_solutions = self.generate_new_solutions(best_solution[0])
-                new_best_solution = self.evaluate(new_solutions)
+                best_solution = self.evaluate_neighbours(best_solution, solutions, 0)
                 if self.show_each_solution:
                     print("       {}              {}            {}".
-                          format(str(new_best_solution[1]).rjust(2), new_best_solution[0].rjust(2), str(round_number).rjust(2)))
-                if new_best_solution[1] < best_solution[1]:
-                    solutions = new_solutions
-                    best_solution = new_best_solution
-                    if not self.silent:
-                        print("\nFitter Solution ({}):  ".format(best_solution[1]), best_solution[0],
-                              "          ", str(round_number).rjust(2), "\n")
+                          format(best_solution[1], [i[0] for i in best_solution[0]], str(round_number).rjust(2)))
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
-            rounds.append(round_number)
-            print("\nHill Climbing complete, Execution Time:     {0:.3f} seconds".format(exec_time),
-                  "          Rounds:", round_number, "\n")
-        self.set_stats(times, rounds, number_of_runs)
-
-    # def fitness(self, source, target):
-    #     fit_chars = [None] * len(self.target_string)
-    #     if len(source) == len(target):
-    #         pairs = zip(source, target)
-    #         hamming_distance = 0
-    #         for i, (a, b) in enumerate(pairs):
-    #             if a != b:
-    #                 hamming_distance += 1
-    #             else:
-    #                 fit_chars[i] = [a]
-    #         return hamming_distance, fit_chars
-    #     else:
-    #         raise ValueError('Source and target string must be of the same length!')
+            fitness_values.append(best_solution[1])
+            print("\nHill Climb complete      Execution Time: {0:.3f} seconds".format(exec_time),
+                  "          Fittest APFD value found:", best_solution[1], "          Rounds:", round_number, "\n")
+        self.set_stats(times, fitness_values, number_of_runs)
 
     def evaluate(self, solutions):
         solutions_evaluated = []
         for solution in solutions:
             solution_fitness = self.fitness(solution, self.solution_size)
-            # solution_fitness = self.fitness(solution)
-            # print("\nsolution fitness", solution_fitness)
-            # fitness = solution_fitness[0]
-            # fit_chars = solution_fitness[1]
-            # solution = solution_str, fitness, fit_chars
             solution = solution, solution_fitness
             solutions_evaluated.append(solution)
         best_solution = max(solutions_evaluated, key=itemgetter(1))
-        # print("Best:", best_solution)
         return best_solution
 
-    def generate_new_solutions(self, best_solution):
-        solutions = []
-        for i in range(0, self.solutions_pool_size):
-            solution = []
-            str_length = len(self.target_string)
-            for j, char in enumerate(range(0,str_length)):
-                if best_solution[j] is None:
-                    char = random.choice(self.available_chars())
-                    solution.append(char)
-                else:
-                    solution.append(best_solution[j][0])
-            solution_string = ''.join(solution)
-            solutions.append(solution_string)
-        return solutions
+    def evaluate_neighbours(self, best_solution, solutions, iterations):
+        if iterations < 200:
+            neighbouring_solution = self.swap_externally(best_solution[0], solutions)
+            neighbouring_solution_fitness = self.fitness(neighbouring_solution, self.solution_size)
+            if neighbouring_solution_fitness > best_solution[1]:
+                best_solution = neighbouring_solution, neighbouring_solution_fitness
+                if not self.silent:
+                    print("\nSolution with fitter APFD found:           {0:.10f}        ".format(best_solution[1]),
+                          [i[0] for i in best_solution[0]])
+                return best_solution
+            else:
+                iterations += 1
+                return self.evaluate_neighbours(best_solution, solutions, iterations)
+        else:
+            # print("No fitter neigbour found...")
+            return best_solution
+
+    def swap_internally(self, solution):
+        if self.show_swapping_internals: print("Solution pre-swap:   ", [i[0] for i in solution])
+        first_random_index = random.randint(0, self.solution_size - 1)
+        second_random_index = self.swap_test_cases(first_random_index, self.solution_size)
+        solution[second_random_index], solution[first_random_index] = solution[first_random_index], solution[
+            second_random_index]
+        if self.show_swapping_internals:
+            print("Test Case", solution[second_random_index][0], "at index #{}".format(first_random_index),
+                  "swapped with Test Case", solution[first_random_index][0], "at index #{}".format(second_random_index))
+            print("Solution post-swap:   ", [i[0] for i in solution], "\n")
+        return solution
+
+    def swap_externally(self, solution, solutions):
+        random_picked_solution = self.find_unique_neighbour(solution, solutions)
+        if self.show_swapping_internals:
+            print("Solution pre-swap:       ", [i[0] for i in solution])
+            print("Randomly picked solution:", [i[0] for i in random_picked_solution])
+        swapped_solution = self.swap_and_check_test_cases(solution, random_picked_solution)
+        if self.show_swapping_internals: print("Solution post-swap:   ", [i[0] for i in swapped_solution], "\n")
+        return swapped_solution
+
+    def find_unique_neighbour(self, solution, solutions):
+        rand_solution_index = random.randint(0, len(solutions) - 1)
+        random_picked_solution = solutions[rand_solution_index]
+        if set([i[0] for i in random_picked_solution]) == set([i[0] for i in solution]) or len(set([i[0] for i in random_picked_solution]) - set([i[0] for i in solution])) == 0:
+            if self.show_swapping_internals:
+                print("Solution:                    ", [i[0] for i in solution])
+                print("Randomly picked solution:    ", [i[0] for i in random_picked_solution])
+                print("Failed to find unique neighbours, trying again...")
+            return self.find_unique_neighbour(solution, solutions)
+        else:
+            return random_picked_solution
+
+    def swap_and_check_test_cases(self, solution, random_picked_solution):
+        first_random_index = random.randint(0, self.solution_size - 1)
+        difference = list(set([i[0] for i in random_picked_solution]) - set([i[0] for i in solution]))
+        diff_list_index = random.randint(0, len(difference) - 1)
+        second_index = [i[0] for i in random_picked_solution].index(difference[diff_list_index])
+        if self.show_swapping_internals:
+            print("Difference in picked:", difference)
+            print("Index of difference list:", diff_list_index, "elem:", difference[diff_list_index])
+            print("Swap Test Case", solution[first_random_index][0], "with Test Case",
+                  random_picked_solution[second_index][0])
+        solution[first_random_index], random_picked_solution[second_index] = random_picked_solution[second_index], solution[first_random_index]
+        if self.show_swapping_internals:
+            print("Test Case", random_picked_solution[second_index][0], "at index #{}".format(first_random_index),
+                      "swapped with Test Case", solution[first_random_index][0],
+                      "at index #{}".format(second_index))
+        return solution
 
     def set_show_each_solution(self, boolean):
         self.show_each_solution = boolean
@@ -105,11 +128,14 @@ class HillClimbing(GeneticAlgorithm):
     def set_silent(self, boolean):
         self.silent = boolean
 
-    def set_stats(self, times, rounds, number_of_runs):
+    def set_show_swapping_internals(self, boolean):
+        self.show_swapping_internals = boolean
+
+    def set_stats(self, times, fitness_values, number_of_runs):
         self.mean_time = sum(times) / number_of_runs
-        self.mean_rounds = sum(rounds) / number_of_runs
+        self.mean_fitness = sum(fitness_values) / number_of_runs
 
     def get_stats(self):
-        print("\n\nHill Climbing Run, Mean Execution Time:     {0:.3f} seconds".format(self.mean_time),
-              "     Mean Rounds:", int(self.mean_rounds), "\n\n\n")
+        print("\n\nHill Climb run complete           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
+              "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
         return self.mean_time

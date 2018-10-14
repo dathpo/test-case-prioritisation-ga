@@ -14,7 +14,6 @@ class GeneticAlgorithm:
     silent = None
     mean_time = None
     mean_fitness = None
-    failed = False
 
     def __init__(self, test_case_suite, chromosome_size, population_size, number_of_generations, crossover_rate,
                  mutation_rate, tournament_size_percent, strongest_winner_probability):
@@ -45,7 +44,6 @@ class GeneticAlgorithm:
         times = []
         fitness_values = []
         for i in range(0, number_of_runs):
-            self.failed = False
             start_time = timeit.default_timer()
             population = self.generate_population(self.population_size, self.chromosome_size)
             if self.tournament_size() % 2 != 0:
@@ -79,11 +77,9 @@ class GeneticAlgorithm:
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
             fitness_values.append(fittest_chromosome[1])
-            if not self.failed:
-                print("\nGA Search complete         Execution Time: {0:.3f} seconds".format(exec_time),
-                      "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
-        if not self.failed:
-            self.set_stats(times, fitness_values, number_of_runs)
+            print("\nGA Search complete         Execution Time: {0:.3f} seconds".format(exec_time),
+                  "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
+        self.set_stats(times, fitness_values, number_of_runs)
 
     def generate_population(self, population_size, chromosome_size):
         population = []

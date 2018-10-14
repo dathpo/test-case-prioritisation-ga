@@ -9,7 +9,7 @@ class CSVParser:
     def __init__(self, file_name):
         self.file_name = file_name
 
-    def parse(self):
+    def parse_unique(self):
         pwd = os.path.abspath(os.path.dirname(__file__))
         path = os.path.join(pwd, self.file_name)
         unique_fault_combinations = {}
@@ -25,4 +25,18 @@ class CSVParser:
             for key in unique_fault_combinations.keys():
                 test_case = (unique_fault_combinations.get(key), list(key))
                 test_cases.append(test_case)
+        return test_cases
+
+    def parse_fully(self):
+        pwd = os.path.abspath(os.path.dirname(__file__))
+        path = os.path.join(pwd, self.file_name)
+        test_cases = []
+        with open(path, newline='') as file:
+            matrix_reader = csv.reader(file)
+            for row in matrix_reader:
+                faults_revealed = []
+                for element in row[1:]:
+                    inted = int(element)
+                    faults_revealed.append(inted)
+                test_cases.append((row[0], faults_revealed))
         return test_cases

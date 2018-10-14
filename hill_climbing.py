@@ -25,12 +25,12 @@ class HillClimbing(GeneticAlgorithm):
             start_time = timeit.default_timer()
             solutions = self.generate_population(self.solutions_pool_size, self.solution_size)
             best_solution = self.evaluate(solutions)
-            if not self.set_silent:
-                print("Solution with fittest APFD selected:       {0:.10f}".format(best_solution[1]), "      ", [i[0] for i in best_solution[0]])
             round_number = 0
             if not self.silent:
                 if self.show_each_solution is True:
                     print("\n     Fitness              Solution\n")
+                print("Solution with fittest APFD selected:       {0:.10f}".format(best_solution[1]),
+                      "      ", [i[0] for i in best_solution[0]])
             for i in range(0, self.number_of_rounds):
                 round_number += 1
                 if best_solution[1] == 1:
@@ -69,7 +69,6 @@ class HillClimbing(GeneticAlgorithm):
                 iterations += 1
                 return self.evaluate_neighbours(best_solution, solutions, iterations)
         else:
-            # print("No fitter neigbour found...")
             return best_solution
 
     def swap_internally(self, solution):

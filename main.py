@@ -9,7 +9,7 @@ from csv_parser import CSVParser
 
 def main():
     parser = CSVParser('bigfaultmatrix.txt')
-    test_case_suite = parser.parse()
+    test_case_suite = parser.parse_unique()
 
     """
     The main method for the application. The Genetic Algorithm uses tournament
@@ -42,13 +42,13 @@ def main():
     @param: solutions_size Amount of solutions (strings) to search for a
             better solution in
     """
-    hc = HillClimbing(test_case_suite, 111, 400, 500)
+    """hc = HillClimbing(test_case_suite, 111, 400, 500)
     hc.set_show_each_solution(False)
     hc.set_show_fitness_internals(False)
     hc.set_show_swapping_internals(False)
     hc.set_silent(True)
     hc.run(10)
-    hc.get_stats()
+    hc.get_stats()"""
 
     """
     The Random Search constructor takes in the following parameters:
@@ -56,11 +56,11 @@ def main():
     @param: solutions_size Amount of solutions (strings) generated randomly
             each round in which the solution is searched for
     """
-    """rs = RandomSearch(target_string, 1)
+    rs = RandomSearch(test_case_suite, 111, 400, 20)
     rs.set_show_each_solution(False)
-    rs.set_silent(True)
+    rs.set_silent(False)
     rs.run(10)
-    rs.get_stats()"""
+    rs.get_stats()
 
 
 if __name__ == "__main__":

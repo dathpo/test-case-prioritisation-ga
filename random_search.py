@@ -71,7 +71,5 @@ class RandomSearch(GeneticAlgorithm):
         self.mean_fitness = sum(fitness_values) / number_of_runs
 
     def get_stats(self):
-            print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
-              "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
-        # else:
-        #     print("\n\nRandom Search failed to reach the target string after a reasonable amount of time\n\n\n")
+            print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time)
+                  , "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")

@@ -12,13 +12,13 @@ import matplotlib.pyplot as plt
 
 
 def main():
-    runs = 100
+    runs = 20
     rounds = 20
-    chromosome_size = 5
-    population_size = 120
+    chromosome_size = 23
+    population_size = 1000
 
-    parser = CSVParser('smallfaultmatrix.txt')
-    test_case_fault_matrix = parser.parse_unique()
+    parser = CSVParser('bigfaultmatrix.txt')
+    test_case_fault_matrix = parser.parse_fully()
 
     ga = GeneticAlgorithm(test_case_fault_matrix, chromosome_size, population_size, rounds, 0.8, 0.08, 0.05, 0.75)
     ga.set_show_each_chromosome(False)
@@ -52,21 +52,13 @@ def main():
     rs.run(runs)
     rs_fitness = rs.get_stats()
 
-    # np.random.seed(10)
-    # collectn_1 = np.random.normal(100, 10, 200)
-    # collectn_2 = np.random.normal(80, 30, 200)
-    # collectn_3 = np.random.normal(90, 20, 200)
-    # collectn_4 = np.random.normal(70, 25, 200)
-
     rs_data = np.array(rs_fitness)
     hs_internal = np.array(hc_internal_fitness)
     hs_external = np.array(hc_external_fitness)
     ga_data = np.array(ga_fitness)
 
     ## combine these different collections into a list
-    # data_to_plot = [collectn_1, collectn_2, collectn_3, collectn_4]
     data_to_plot = [rs_data, hs_internal, hs_external, ga_data]
-
 
     # Create a figure instance
     fig = plt.figure(1, figsize=(9, 6))
@@ -75,7 +67,6 @@ def main():
     ax = fig.add_subplot(111)
 
     ## add patch_artist=True option to ax.boxplot()
-    ## to get fill color
     bp = ax.boxplot(data_to_plot, patch_artist=True)
 
     ## change outline color, fill color and linewidth of the boxes
@@ -110,7 +101,6 @@ def main():
 
     # Save the figure
     fig.savefig('fig1.png', bbox_inches='tight')
-
     plt.show()
 
 

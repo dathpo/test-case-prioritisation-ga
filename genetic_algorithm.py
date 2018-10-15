@@ -15,9 +15,9 @@ class GeneticAlgorithm:
     mean_time = None
     mean_fitness = None
 
-    def __init__(self, test_case_suite, chromosome_size, population_size, number_of_generations, crossover_rate,
+    def __init__(self, test_case_fault_matrix, chromosome_size, population_size, number_of_generations, crossover_rate,
                  mutation_rate, tournament_size_percent, strongest_winner_probability):
-        self.test_case_suite = test_case_suite
+        self.test_case_fault_matrix = test_case_fault_matrix
         self.chromosome_size = chromosome_size
         self.population_size = population_size
         self.number_of_generations = number_of_generations
@@ -92,8 +92,8 @@ class GeneticAlgorithm:
         return population
 
     def populate(self, j, chromosome):
-        random_index = random.randint(0, len(self.test_case_suite) - 1)
-        chromosome.append(self.test_case_suite[random_index])
+        random_index = random.randint(0, len(self.test_case_fault_matrix) - 1)
+        chromosome.append(self.test_case_fault_matrix[random_index])
         if self.show_duplicate_internals: print("Chromosome:", [i[0] for i in chromosome])
         if j > 0:
             if self.check_for_duplicate(chromosome):

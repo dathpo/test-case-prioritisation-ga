@@ -11,8 +11,8 @@ class RandomSearch(GeneticAlgorithm):
     mean_time = None
     mean_fitness = None
 
-    def __init__(self, test_case_suite, solution_size, solutions_pool_size, number_of_rounds):
-        self.test_case_suite = test_case_suite
+    def __init__(self, test_case_fault_matrix, solution_size, solutions_pool_size, number_of_rounds):
+        self.test_case_fault_matrix = test_case_fault_matrix
         self.solution_size = solution_size
         self.solutions_pool_size = solutions_pool_size
         self.number_of_rounds = number_of_rounds

@@ -13,16 +13,18 @@ class HillClimbing(GeneticAlgorithm):
     mean_fitness = None
     climb = 0
     mean_climbs = None
+    fitness_values = None
 
-    def __init__(self, test_case_fault_matrix, solution_size, solutions_pool_size, number_of_rounds):
+    def __init__(self, test_case_fault_matrix, solution_size, solutions_pool_size, number_of_rounds, is_external_swap):
         self.test_case_fault_matrix = test_case_fault_matrix
         self.solution_size = solution_size
         self.solutions_pool_size = solutions_pool_size
         self.number_of_rounds = number_of_rounds
+        self.is_external_swap = is_external_swap
 
     def run(self, number_of_runs):
         times = []
-        fitness_values = []
+        self.fitness_values = []
         number_of_climbs = []
         for i in range(0, number_of_runs):
             self.climb = 0
@@ -39,18 +41,18 @@ class HillClimbing(GeneticAlgorithm):
                 round_number += 1
                 if best_solution[1] == 1:
                     break
-                best_solution = self.evaluate_neighbours(best_solution, solutions, 0)
+                best_solution = self.evaluate_neighbours(best_solution, solutions, 0, self.is_external_swap)
                 if self.show_each_solution:
                     print("       {}              {}            {}".
                           format(best_solution[1], [i[0] for i in best_solution[0]], str(round_number).rjust(2)))
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
-            fitness_values.append(best_solution[1])
+            self.fitness_values.append(best_solution[1])
             number_of_climbs.append(self.climb)
             print("\nHill Climb complete      Execution Time: {0:.3f} seconds".format(exec_time),
                   "          Fittest APFD value found:", best_solution[1], "          Climbs:", self.climb
                   , "       Rounds:", round_number, "\n")
-        self.set_stats(times, fitness_values, number_of_climbs, number_of_runs)
+        self.set_stats(times, self.fitness_values, number_of_climbs, number_of_runs)
 
     def evaluate(self, solutions):
         solutions_evaluated = []
@@ -61,9 +63,12 @@ class HillClimbing(GeneticAlgorithm):
         best_solution = max(solutions_evaluated, key=itemgetter(1))
         return best_solution
 
-    def evaluate_neighbours(self, best_solution, solutions, iterations):
+    def evaluate_neighbours(self, best_solution, solutions, iterations, is_external_swap):
         if iterations < 200:
-            neighbouring_solution = self.swap_externally(best_solution[0], solutions)
+            if is_external_swap:
+                neighbouring_solution = self.swap_externally(best_solution[0], solutions)
+            else:
+                neighbouring_solution = self.swap_internally(best_solution[0])
             neighbouring_solution_fitness = self.fitness(neighbouring_solution, self.solution_size)
             if neighbouring_solution_fitness > best_solution[1]:
                 best_solution = neighbouring_solution, neighbouring_solution_fitness
@@ -74,7 +79,7 @@ class HillClimbing(GeneticAlgorithm):
                 return best_solution
             else:
                 iterations += 1
-                return self.evaluate_neighbours(best_solution, solutions, iterations)
+                return self.evaluate_neighbours(best_solution, solutions, iterations, is_external_swap)
         else:
             return best_solution
 
@@ -145,3 +150,4 @@ class HillClimbing(GeneticAlgorithm):
     def get_stats(self):
         print("\n\nHill Climb run complete           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
               "         Mean Fitness (APFD):", self.mean_fitness, "          Mean Climbs:", self.mean_climbs, "\n\n\n")
+        return self.fitness_values

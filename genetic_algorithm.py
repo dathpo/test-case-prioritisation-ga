@@ -14,6 +14,7 @@ class GeneticAlgorithm:
     silent = None
     mean_time = None
     mean_fitness = None
+    fitness_values = None
 
     def __init__(self, test_case_fault_matrix, chromosome_size, population_size, number_of_generations, crossover_rate,
                  mutation_rate, tournament_size_percent, strongest_winner_probability):
@@ -42,7 +43,7 @@ class GeneticAlgorithm:
 
     def run(self, number_of_runs):
         times = []
-        fitness_values = []
+        self.fitness_values = []
         for i in range(0, number_of_runs):
             start_time = timeit.default_timer()
             population = self.generate_population(self.population_size, self.chromosome_size)
@@ -76,10 +77,10 @@ class GeneticAlgorithm:
                           "    Chromosome:", [i[0] for i in fittest_chromosome[0]])
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
-            fitness_values.append(fittest_chromosome[1])
+            self.fitness_values.append(fittest_chromosome[1])
             print("\nGA Search complete         Execution Time: {0:.3f} seconds".format(exec_time),
                   "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
-        self.set_stats(times, fitness_values, number_of_runs)
+        self.set_stats(times, self.fitness_values, number_of_runs)
 
     def generate_population(self, population_size, chromosome_size):
         population = []
@@ -252,6 +253,7 @@ class GeneticAlgorithm:
     def get_stats(self):
         print("\n\nGA run complete           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
               "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
+        return self.fitness_values
 
     def check_for_duplicate(self, chromosome):
         duplicate_checker = []

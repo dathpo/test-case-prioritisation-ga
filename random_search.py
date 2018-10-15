@@ -10,6 +10,7 @@ class RandomSearch(GeneticAlgorithm):
     silent = None
     mean_time = None
     mean_fitness = None
+    fitness_values = None
 
     def __init__(self, test_case_fault_matrix, solution_size, solutions_pool_size, number_of_rounds):
         self.test_case_fault_matrix = test_case_fault_matrix
@@ -19,7 +20,7 @@ class RandomSearch(GeneticAlgorithm):
 
     def run(self, number_of_runs):
         times = []
-        fitness_values = []
+        self.fitness_values = []
         for i in range(0, number_of_runs):
             start_time = timeit.default_timer()
             solutions = self.generate_population(self.solutions_pool_size, self.solution_size)
@@ -46,10 +47,10 @@ class RandomSearch(GeneticAlgorithm):
                               [i[0] for i in best_solution[0]])
             exec_time = timeit.default_timer() - start_time
             times.append(exec_time)
-            fitness_values.append(best_solution[1])
+            self.fitness_values.append(best_solution[1])
             print("\nRandom search complete      Execution Time: {0:.3f} seconds".format(exec_time),
                   "          Fittest APFD value found:", best_solution[1], "          Rounds:", round_number, "\n")
-        self.set_stats(times, fitness_values, number_of_runs)
+        self.set_stats(times, self.fitness_values, number_of_runs)
 
     def evaluate(self, solutions):
         solutions_evaluated = []
@@ -71,5 +72,6 @@ class RandomSearch(GeneticAlgorithm):
         self.mean_fitness = sum(fitness_values) / number_of_runs
 
     def get_stats(self):
-            print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time)
+        print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time)
                   , "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
+        return self.fitness_values

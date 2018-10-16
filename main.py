@@ -6,13 +6,11 @@ from random_search import RandomSearch
 from genetic_algorithm import GeneticAlgorithm
 from csv_parser import CSVParser
 import numpy as np
-import matplotlib as mpl
-# mpl.use('agg')
 import matplotlib.pyplot as plt
 
 
 def main():
-    runs = 20
+    runs = 10
     rounds = 20
     chromosome_size = 23
     population_size = 1000
@@ -56,6 +54,15 @@ def main():
     hs_internal = np.array(hc_internal_fitness)
     hs_external = np.array(hc_external_fitness)
     ga_data = np.array(ga_fitness)
+
+    # test_cases_per_test_suite = np.array([5, 10, 20, 23, 30, 50, 100])
+    # unique_large_apfd = np.array([0.4594736842105263, 0.6063157894736844, 0.6867105263157895, 0.6978260869565216, 0.7128947368421051, 0.7326842105263159, 0.7480263157894737])
+    # full_large_apfd = np.array([0.44631578947368417, 0.6023684210526316, 0.6846052631578947, 0.6958810068649884, 0.7122807017543858, 0.7320526315789474, 0.7476578947368421])
+
+    # plt.plot(test_cases_per_test_suite, unique_large_apfd, '-gD')
+    # plt.xlabel("Test Cases per Test Suite")
+    # plt.ylabel("Mean Fitness (APFD)")
+    # plt.xticks(np.arange(min(test_cases_per_test_suite), max(test_cases_per_test_suite) + 1, 5.0))
 
     ## combine these different collections into a list
     data_to_plot = [rs_data, hs_internal, hs_external, ga_data]

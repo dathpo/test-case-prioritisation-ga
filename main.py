@@ -7,16 +7,21 @@ from genetic_algorithm import GeneticAlgorithm
 from csv_parser import CSVParser
 import numpy as np
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_pdf import PdfPages
+import os.path
 
 
 def main():
     runs = 10
-    rounds = 20
+    rounds = 5
     chromosome_size = 23
     population_size = 1000
+    data_set_name = 'bigfaultmatrix.txt'
 
-    parser = CSVParser('bigfaultmatrix.txt')
-    test_case_fault_matrix = parser.parse_fully()
+    pwd = os.path.abspath(os.path.dirname(__file__))
+    data_set_path = os.path.join(pwd, data_set_name)
+    parser = CSVParser(data_set_path)
+    test_case_fault_matrix = parser.parse_data(True)
 
     ga = GeneticAlgorithm(test_case_fault_matrix, chromosome_size, population_size, rounds, 0.8, 0.08, 0.05, 0.75)
     ga.set_show_each_chromosome(False)
@@ -28,21 +33,18 @@ def main():
     ga.run(runs)
     ga_fitness = ga.get_stats()
 
-    hc = HillClimbing(test_case_fault_matrix, chromosome_size, population_size, rounds, False)
-    hc.set_show_each_solution(False)
-    hc.set_show_fitness_internals(False)
-    hc.set_show_swapping_internals(False)
-    hc.set_silent(True)
-    hc.run(runs)
-    hc_internal_fitness = hc.get_stats()
-
-    hc = HillClimbing(test_case_fault_matrix, chromosome_size, population_size, rounds, True)
-    hc.set_show_each_solution(False)
-    hc.set_show_fitness_internals(False)
-    hc.set_show_swapping_internals(False)
-    hc.set_silent(True)
-    hc.run(runs)
-    hc_external_fitness = hc.get_stats()
+    for i in range(0, 2):
+        if i == 0:
+            hc = HillClimbing(test_case_fault_matrix, chromosome_size, population_size, rounds, False)
+        else:
+            hc = HillClimbing(test_case_fault_matrix, chromosome_size, population_size, rounds, True)
+        hc.set_show_each_solution(False)
+        hc.set_show_fitness_internals(False)
+        hc.set_show_swapping_internals(False)
+        hc.set_silent(True)
+        hc.run(runs)
+        if i == 0: hc_internal_fitness = hc.get_stats()
+        else: hc_external_fitness = hc.get_stats()
 
     rs = RandomSearch(test_case_fault_matrix, chromosome_size, population_size, rounds)
     rs.set_show_each_solution(False)
@@ -107,9 +109,12 @@ def main():
     ax.get_yaxis().tick_left()
 
     # Save the figure
-    fig.savefig('fig1.png', bbox_inches='tight')
+    graph_path = os.path.join(pwd, 'graph.pdf')
+    pdf = PdfPages(graph_path)
+    plt.savefig(pdf, format='pdf', bbox_inches='tight')
     plt.show()
-
+    pdf.close()
+    pdf = None
 
 if __name__ == "__main__":
     main()

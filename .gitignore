@@ -18,6 +18,7 @@ pypy/
 /build
 /captures
 .externalNativeBuild
+*.pdf
 
 # User-specific stuff
 .idea/**/workspace.xml

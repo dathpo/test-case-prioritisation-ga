@@ -2,6 +2,7 @@ __author__ = 'David T. Pocock'
 
 import timeit
 from operator import itemgetter
+
 from genetic_algorithm import GeneticAlgorithm
 
 
@@ -72,6 +73,6 @@ class RandomSearch(GeneticAlgorithm):
         self.mean_fitness = sum(fitness_values) / number_of_runs
 
     def get_stats(self):
-        print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time)
-                  , "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
+        print("\n\nRandom search run           Mean Execution Time: {0:.3f} seconds".format(self.mean_time),
+              "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
         return self.fitness_values

@@ -1,7 +1,7 @@
 __author__ = 'David T. Pocock'
 
-
-import random, string, timeit
+import random
+import timeit
 from operator import itemgetter
 
 
@@ -37,7 +37,8 @@ class GeneticAlgorithm:
     def strongest_winner_prob(self):
         return self.strongest_winner_probability
 
-    def crossover_point(self):
+    @staticmethod
+    def crossover_point():
         value = random.random()
         return value
 
@@ -51,8 +52,8 @@ class GeneticAlgorithm:
                 raise ValueError('Tournament Size must be an even number!')
             generation_number = 0
             fittest_chromosome = 0
-            if self.show_each_chromosome: print("       Fitness (APFD)                          Chromosome        "
-                                                "             Generation\n")
+            if self.show_each_chromosome:
+                print("       Fitness (APFD)                          Chromosome                     Generation\n")
             for i in range(0, self.number_of_generations):
                 generation_number += 1
                 winners = self.selection(population)
@@ -66,7 +67,8 @@ class GeneticAlgorithm:
                     if counter == 1:
                         fittest_chromosome = chromosome, fitness_value
                     if self.show_each_chromosome:
-                        print("       {0:.10f}".format(fitness_value), "            {}".format([i[0] for i in chromosome]),
+                        print("       {0:.10f}".format(fitness_value),
+                              "            {}".format([i[0] for i in chromosome]),
                               "            {}".format(generation_number))
                     if fitness_value >= fittest_chromosome[1]:
                         fittest_chromosome = chromosome, fitness_value
@@ -79,7 +81,8 @@ class GeneticAlgorithm:
             times.append(exec_time)
             self.fitness_values.append(fittest_chromosome[1])
             print("\nGA Search complete         Execution Time: {0:.3f} seconds".format(exec_time),
-                  "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:", generation_number, "\n")
+                  "          Fittest APFD value found:", fittest_chromosome[1], "          Generations:",
+                  generation_number, "\n")
         self.set_stats(times, self.fitness_values, number_of_runs)
 
     def generate_population(self, population_size, chromosome_size):
@@ -88,17 +91,20 @@ class GeneticAlgorithm:
             chromosome = []
             for j in range(0, chromosome_size):
                 self.populate(j, chromosome)
-            if self.show_duplicate_internals: print()
+            if self.show_duplicate_internals:
+                print()
             population.append(chromosome)
         return population
 
     def populate(self, j, chromosome):
         random_index = random.randint(0, len(self.test_case_fault_matrix) - 1)
         chromosome.append(self.test_case_fault_matrix[random_index])
-        if self.show_duplicate_internals: print("Chromosome:", [i[0] for i in chromosome])
+        if self.show_duplicate_internals:
+            print("Chromosome:", [i[0] for i in chromosome])
         if j > 0:
             if self.check_for_duplicate(chromosome):
-                if self.show_duplicate_internals: print("Duplicate found, popping it and picking again")
+                if self.show_duplicate_internals:
+                    print("Duplicate found, popping it and picking again")
                 chromosome.pop()
                 self.populate(j, chromosome)
 
@@ -106,24 +112,26 @@ class GeneticAlgorithm:
         weight = 0
         number_of_test_cases_in_set = chromosome_size
         number_of_faults = len(chromosome[0][1])
-        if self.show_fitness_internals: print("Calculating fitness (APFD) of Chromosome:", [i[0] for i in chromosome])
+        if self.show_fitness_internals:
+            print("Calculating fitness (APFD) of Chromosome:", [i[0] for i in chromosome])
         for i in range(0, number_of_faults):
             for j in range(0, number_of_test_cases_in_set):
                 if chromosome[j][1][i]:
-                    weight += j+1
+                    weight += j + 1
                     break
                 if j == chromosome_size - 1:
                     weight += number_of_test_cases_in_set + 1
-        apfd = 1 - (weight/(number_of_faults * number_of_test_cases_in_set)) + 1/(2 * number_of_test_cases_in_set)
+        apfd = 1 - (weight / (number_of_faults * number_of_test_cases_in_set)) + 1 / (2 * number_of_test_cases_in_set)
         if self.show_fitness_internals:
             print("APFD:", apfd, "Weight:", weight, "Number of Faults:", number_of_faults,
-              "Number of Test Cases:", number_of_test_cases_in_set, "\n")
+                  "Number of Test Cases:", number_of_test_cases_in_set, "\n")
         return apfd
 
     def selection(self, population):
         return self.tournament_selection(population)
 
-    def decision(self, probability):
+    @staticmethod
+    def decision(probability):
         rand_int = random.random()
         return rand_int < probability
 
@@ -207,16 +215,20 @@ class GeneticAlgorithm:
     def mutate(self, generation):
         new_generation = []
         for chromosome in generation:
-            if self.show_mutation_internals: print("\nChromosome being worked on:  ", [i[0] for i in chromosome], "\n")
+            if self.show_mutation_internals:
+                print("\nChromosome being worked on:  ", [i[0] for i in chromosome], "\n")
             for test_case in chromosome:
                 if self.decision(self.mutation_rate):
-                    if self.show_mutation_internals: print("Chromosome pre-mutation:   ", [i[0] for i in chromosome])
+                    if self.show_mutation_internals:
+                        print("Chromosome pre-mutation:   ", [i[0] for i in chromosome])
                     current_index = chromosome.index(test_case)
                     random_index = self.swap_test_cases(current_index, self.chromosome_size)
-                    chromosome[current_index], chromosome[random_index] = chromosome[random_index], chromosome[current_index]
+                    chromosome[current_index], chromosome[random_index] = chromosome[random_index], chromosome[
+                        current_index]
                     if self.show_mutation_internals:
                         print("Test Case", chromosome[current_index][0], "at index #{}".format(random_index),
-                              "swapped with Test Case", chromosome[random_index][0], "at index #{}".format(current_index))
+                              "swapped with Test Case", chromosome[random_index][0],
+                              "at index #{}".format(current_index))
                         print("Chromosome post-mutation:   ", [i[0] for i in chromosome], "\n")
             new_generation.append(chromosome)
         return new_generation
@@ -255,7 +267,8 @@ class GeneticAlgorithm:
               "         Mean Fitness (APFD):", self.mean_fitness, "\n\n\n")
         return self.fitness_values
 
-    def check_for_duplicate(self, chromosome):
+    @staticmethod
+    def check_for_duplicate(chromosome):
         duplicate_checker = []
         for test_case, faults in chromosome:
             duplicate_checker.append(test_case)

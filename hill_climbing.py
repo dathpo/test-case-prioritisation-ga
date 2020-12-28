@@ -1,7 +1,9 @@
 __author__ = 'David T. Pocock'
 
-import timeit, random
+import random
+import timeit
 from operator import itemgetter
+
 from genetic_algorithm import GeneticAlgorithm
 
 
@@ -50,8 +52,8 @@ class HillClimbing(GeneticAlgorithm):
             self.fitness_values.append(best_solution[1])
             number_of_climbs.append(self.climb)
             print("\nHill Climb complete      Execution Time: {0:.3f} seconds".format(exec_time),
-                  "          Fittest APFD value found:", best_solution[1], "          Climbs:", self.climb
-                  , "       Rounds:", round_number, "\n")
+                  "          Fittest APFD value found:", best_solution[1], "          Climbs:", self.climb,
+                  "       Rounds:", round_number, "\n")
         self.set_stats(times, self.fitness_values, number_of_climbs, number_of_runs)
 
     def evaluate(self, solutions):
@@ -84,7 +86,8 @@ class HillClimbing(GeneticAlgorithm):
             return best_solution
 
     def swap_internally(self, solution):
-        if self.show_swapping_internals: print("Solution pre-swap:   ", [i[0] for i in solution])
+        if self.show_swapping_internals:
+            print("Solution pre-swap:   ", [i[0] for i in solution])
         first_random_index = random.randint(0, self.solution_size - 1)
         second_random_index = self.swap_test_cases(first_random_index, self.solution_size)
         solution[second_random_index], solution[first_random_index] = solution[first_random_index], solution[
@@ -101,13 +104,15 @@ class HillClimbing(GeneticAlgorithm):
             print("Solution pre-swap:       ", [i[0] for i in solution])
             print("Randomly picked solution:", [i[0] for i in random_picked_solution])
         swapped_solution = self.swap_and_check_test_cases(solution, random_picked_solution)
-        if self.show_swapping_internals: print("Solution post-swap:   ", [i[0] for i in swapped_solution], "\n")
+        if self.show_swapping_internals:
+            print("Solution post-swap:   ", [i[0] for i in swapped_solution], "\n")
         return swapped_solution
 
     def find_unique_neighbour(self, solution, solutions):
         rand_solution_index = random.randint(0, len(solutions) - 1)
         random_picked_solution = solutions[rand_solution_index]
-        if set([i[0] for i in random_picked_solution]) == set([i[0] for i in solution]) or len(set([i[0] for i in random_picked_solution]) - set([i[0] for i in solution])) == 0:
+        if set([i[0] for i in random_picked_solution]) == set([i[0] for i in solution]) or len(
+                set([i[0] for i in random_picked_solution]) - set([i[0] for i in solution])) == 0:
             if self.show_swapping_internals:
                 print("Solution:                    ", [i[0] for i in solution])
                 print("Randomly picked solution:    ", [i[0] for i in random_picked_solution])
@@ -126,11 +131,12 @@ class HillClimbing(GeneticAlgorithm):
             print("Index of difference list:", diff_list_index, "elem:", difference[diff_list_index])
             print("Swap Test Case", solution[first_random_index][0], "with Test Case",
                   random_picked_solution[second_index][0])
-        solution[first_random_index], random_picked_solution[second_index] = random_picked_solution[second_index], solution[first_random_index]
+        solution[first_random_index], random_picked_solution[second_index] = random_picked_solution[second_index], \
+                                                                             solution[first_random_index]
         if self.show_swapping_internals:
             print("Test Case", random_picked_solution[second_index][0], "at index #{}".format(first_random_index),
-                      "swapped with Test Case", solution[first_random_index][0],
-                      "at index #{}".format(second_index))
+                  "swapped with Test Case", solution[first_random_index][0],
+                  "at index #{}".format(second_index))
         return solution
 
     def set_show_each_solution(self, boolean):

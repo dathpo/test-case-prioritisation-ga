@@ -1,14 +1,15 @@
 __author__ = 'David T. Pocock'
 
+import os.path
 
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.backends.backend_pdf import PdfPages
+
+from csv_parser import CSVParser
+from genetic_algorithm import GeneticAlgorithm
 from hill_climbing import HillClimbing
 from random_search import RandomSearch
-from genetic_algorithm import GeneticAlgorithm
-from csv_parser import CSVParser
-import numpy as np
-import matplotlib.pyplot as plt
-from matplotlib.backends.backend_pdf import PdfPages
-import os.path
 
 
 def main():
@@ -43,8 +44,10 @@ def main():
         hc.set_show_swapping_internals(False)
         hc.set_silent(True)
         hc.run(runs)
-        if i == 0: hc_internal_fitness = hc.get_stats()
-        else: hc_external_fitness = hc.get_stats()
+        if i == 0:
+            hc_internal_fitness = hc.get_stats()
+        else:
+            hc_external_fitness = hc.get_stats()
 
     rs = RandomSearch(test_case_fault_matrix, chromosome_size, population_size, rounds)
     rs.set_show_each_solution(False)
@@ -66,7 +69,7 @@ def main():
     # plt.ylabel("Mean Fitness (APFD)")
     # plt.xticks(np.arange(min(test_cases_per_test_suite), max(test_cases_per_test_suite) + 1, 5.0))
 
-    ## combine these different collections into a list
+    # combine these different collections into a list
     data_to_plot = [rs_data, hs_internal, hs_external, ga_data]
 
     # Create a figure instance
@@ -75,36 +78,36 @@ def main():
     # Create an axes instance
     ax = fig.add_subplot(111)
 
-    ## add patch_artist=True option to ax.boxplot()
+    # add patch_artist=True option to ax.boxplot()
     bp = ax.boxplot(data_to_plot, patch_artist=True)
 
-    ## change outline color, fill color and linewidth of the boxes
+    # change outline color, fill color and linewidth of the boxes
     for box in bp['boxes']:
         # change outline color
         box.set(color='#7570b3', linewidth=2)
         # change fill color
         box.set(facecolor='#1b9e77')
 
-    ## change color and linewidth of the whiskers
+    # change color and linewidth of the whiskers
     for whisker in bp['whiskers']:
         whisker.set(color='#7570b3', linewidth=2)
 
-    ## change color and linewidth of the caps
+    # change color and linewidth of the caps
     for cap in bp['caps']:
         cap.set(color='#7570b3', linewidth=2)
 
-    ## change color and linewidth of the medians
+    # change color and linewidth of the medians
     for median in bp['medians']:
         median.set(color='#b2df8a', linewidth=2)
 
-    ## change the style of fliers and their fill
+    # change the style of fliers and their fill
     for flier in bp['fliers']:
         flier.set(marker='o', color='#e7298a', alpha=0.5)
 
-    ## Custom x-axis labels
+    # Custom x-axis labels
     ax.set_xticklabels(['Random Search', 'HC Internal Swap', 'HC External Swap', 'Genetic Algorithm'])
 
-    ## Remove top axes and right axes ticks
+    # Remove top axes and right axes ticks
     ax.get_xaxis().tick_bottom()
     ax.get_yaxis().tick_left()
 
@@ -114,7 +117,7 @@ def main():
     plt.savefig(pdf, format='pdf', bbox_inches='tight')
     plt.show()
     pdf.close()
-    pdf = None
+
 
 if __name__ == "__main__":
     main()
